@@ -448,13 +448,23 @@ export default function Wardrobe() {
   const [selected, setSelected] = useState(null);
   const [filters, setFilters] = useState({ category: "All", brand: "", colour: "" });
 
-  /* Load on mount */
+  /* Load on mount — show cached data instantly, then sync from Supabase */
   useEffect(() => {
+    try {
+      const cachedItems = localStorage.getItem("wardrobe_items");
+      const cachedOutfits = localStorage.getItem("wardrobe_outfits");
+      if (cachedItems) { setItems(JSON.parse(cachedItems)); setLoading(false); }
+      if (cachedOutfits) setOutfits(JSON.parse(cachedOutfits));
+    } catch {}
     (async () => {
       try {
         const [rawItems, rawOutfits] = await Promise.all([db.getAll("items"), db.getAll("outfits")]);
-        setItems(rawItems.map(r => r.data));
-        setOutfits(rawOutfits.map(r => r.data));
+        const newItems = rawItems.map(r => r.data);
+        const newOutfits = rawOutfits.map(r => r.data);
+        setItems(newItems);
+        setOutfits(newOutfits);
+        localStorage.setItem("wardrobe_items", JSON.stringify(newItems));
+        localStorage.setItem("wardrobe_outfits", JSON.stringify(newOutfits));
       } catch { setSyncError(true); }
       finally { setLoading(false); }
     })();
@@ -560,6 +570,7 @@ export default function Wardrobe() {
           </div>
         ) : view === "wardrobe" ? (
           items.length === 0 ? <EmptyState onAdd={() => setAddOpen(true)} /> :
+
           filtered.length === 0 ? <div style={{ textAlign: "center", padding: "80px 0", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 18, color: "#CCC" }}>No items match these filters</div> :
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(168px, 1fr))", gap: "36px 20px" }}>
             {filtered.map(item => <ItemCard key={item.id} item={item} onClick={setSelected} />)}
