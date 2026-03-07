@@ -1,3 +1,8 @@
+bash
+
+cat /home/claude/wardrobe/src/App.jsx
+Output
+
 import React, { useState, useRef, useMemo, useEffect } from 'react'
 
 const CATEGORIES = ["Outerwear","Knitwear","Shirts","T-Shirts","Trousers","Denim","Shorts","Suits","Shoes","Accessories","Bags","Other"]
